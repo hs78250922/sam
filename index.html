@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Pinch Master Pro - نرم‌افزار جامع تحلیل تکنولوژی پینچ | Hossein Sahraei">
+    <meta name="author" content="Hossein Sahraei">
+    <meta name="theme-color" content="#667eea">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pinch Master">
+    <meta name="application-name" content="Pinch Master">
+    
+    <title>Pinch Master Pro | Hossein Sahraei</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+    <h1>🏭 Pinch Master Pro</h1>
+    <p>نرم‌افزار جامع تحلیل تکنولوژی پینچ</p>
+    <span class="hero-badge">v7.0 | By Hossein Sahraei</span>
+</header>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <h3>⚙️ تنظیمات</h3>
+            <label for="dtmin">ΔTmin (°C)</label>
+            <input type="number" id="dtmin" value="10" step="1" min="0.1" onchange="App.calculate()">
+        </div>
+
+        <div class="sidebar-section">
+            <h3>📚 مثال‌های آماده</h3>
+            <button class="btn-example" onclick="App.loadExample(4)">🔵 ۴ جریانه (Kemp)</button>
+            <button class="btn-example" onclick="App.loadExample(7)">🟣 ۷ جریانه (PDF)</button>
+            <button class="btn-example danger" onclick="App.clearData()">🗑️ پاک کردن همه</button>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>📊 وضعیت فعلی</h3>
+            <div class="stat-box">
+                <span class="stat-label">تعداد جریان</span>
+                <span class="stat-value" id="stat-count">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">گرم / سرد</span>
+                <span class="stat-value" id="stat-hotcold">0 / 0</span>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>👨‍💻 توسعه‌دهنده</h3>
+            <div class="author-card">
+                <div class="author-avatar">HS</div>
+                <div class="author-info">
+                    <div class="author-name">Hossein Sahraei</div>
+                    <div class="author-role">Chemical Engineer</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="data">✍️ داده‌ها</button>
+            <button class="tab-btn" data-tab="pta">📊 جدول مسئله</button>
+            <button class="tab-btn" data-tab="curves">📈 منحنی‌ها</button>
+            <button class="tab-btn" data-tab="grid">🕸️ پنجره‌ای</button>
+            <button class="tab-btn" data-tab="equip">⚙️ تجهیزات</button>
+            <button class="tab-btn" data-tab="exergy">♻️ اکسرژی</button>
+            <button class="tab-btn" data-tab="dist">🏗️ تقطیر</button>
+            <button class="tab-btn" data-tab="chp">⚡ CHP</button>
+            <button class="tab-btn" data-tab="ref">❄️ تبرید و آب</button>
+            <button class="tab-btn" data-tab="report">📄 گزارش</button>
+        </nav>
+
+        <div class="tab-content">
+
+            <section id="tab-data" class="tab-pane active">
+                <h2>✍️ ورود داده‌های جریان</h2>
+                <p class="hint">
+                    🔥 <strong>گرم:</strong> Ts &gt; Tt &nbsp;|&nbsp;
+                    ❄️ <strong>سرد:</strong> Ts &lt; Tt &nbsp;|&nbsp;
+                    <strong>CP</strong> باید مثبت باشد
+                </p>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>نام</th><th>Ts (°C)</th><th>Tt (°C)</th>
+                                <th>CP (kW/K)</th><th>نوع</th><th>حذف</th>
+                            </tr>
+                        </thead>
+                        <tbody id="streams-body"></tbody>
+                    </table>
+                </div>
+                <div class="actions">
+                    <button class="btn-primary" onclick="App.addRow()">➕ افزودن</button>
+                    <button class="btn-success" onclick="App.calculate()">✅ محاسبه</button>
+                </div>
+            </section>
+
+            <section id="tab-pta" class="tab-pane">
+                <h2>📊 جدول مسئله (PTA)</h2>
+                <div id="pta-metrics" class="metrics"></div>
+                <div id="pta-table-wrap" class="table-wrap"></div>
+                <div id="cascade-chart" class="chart-container"></div>
+            </section>
+
+            <section id="tab-curves" class="tab-pane">
+                <h2>📈 منحنی‌های ترکیبی و جامع</h2>
+                <div id="composite-chart" class="chart-container"></div>
+                <div id="gcc-chart" class="chart-container"></div>
+            </section>
+
+            <section id="tab-grid" class="tab-pane">
+                <h2>🕸️ نمودار پنجره‌ای</h2>
+                <p class="hint">جریان‌های گرم بالا، سرد پایین. خط عمودی، پینچ را نشان می‌دهد.</p>
+                <div id="grid-chart" class="chart-container"></div>
+            </section>
+
+            <section id="tab-equip" class="tab-pane">
+                <h2>⚙️ جای‌گذاری تجهیزات روی GCC</h2>
+                <select id="equip-select" class="select-input" onchange="App.renderEquip()">
+                    <option value="furnace">🔥 کوره</option>
+                    <option value="turbine">⚙️ توربین</option>
+                    <option value="heatpump">♻️ پمپ حرارتی</option>
+                    <option value="distillation">🏗️ برج تقطیر</option>
+                </select>
+                <div id="equip-chart" class="chart-container"></div>
+                <div id="equip-note" class="hint" style="margin-top:15px;"></div>
+            </section>
+
+            <section id="tab-exergy" class="tab-pane">
+                <h2>♻️ تحلیل اکسرژی</h2>
+                <div id="exergy-metrics" class="metrics"></div>
+                <div id="exergy-table-wrap" class="table-wrap"></div>
+            </section>
+
+            <section id="tab-dist" class="tab-pane">
+                <h2>🏗️ تحلیل برج تقطیر</h2>
+                <div class="form-grid">
+                    <div><label>دمای ریبویلر (°C)</label><input type="number" id="dist-treb" value="120" onchange="App.renderDist()"></div>
+                    <div><label>دمای کندانسور (°C)</label><input type="number" id="dist-tcon" value="60" onchange="App.renderDist()"></div>
+                    <div><label>بار ریبویلر (kW)</label><input type="number" id="dist-qreb" value="100" onchange="App.renderDist()"></div>
+                    <div><label>بار کندانسور (kW)</label><input type="number" id="dist-qcon" value="100" onchange="App.renderDist()"></div>
+                </div>
+                <div id="dist-note" class="hint" style="margin-top:15px;"></div>
+                <div id="dist-chart" class="chart-container"></div>
+            </section>
+
+            <section id="tab-chp" class="tab-pane">
+                <h2>⚡ تحلیل CHP</h2>
+                <div class="form-grid">
+                    <div><label>تقاضای حرارت (kW)</label><input type="number" id="chp-heat" value="500"></div>
+                    <div><label>تقاضای برق (kW)</label><input type="number" id="chp-power" value="1000"></div>
+                    <div><label>هزینه سوخت (€/kWh)</label><input type="number" id="chp-fuel" value="0.03" step="0.001"></div>
+                    <div><label>قیمت برق (€/kWh)</label><input type="number" id="chp-elec" value="0.10" step="0.001"></div>
+                    <div><label>راندمان بویلر</label><input type="number" id="chp-boiler" value="0.80" step="0.01"></div>
+                    <div><label>راندمان الکتریکی CHP</label><input type="number" id="chp-elec-eff" value="0.35" step="0.01"></div>
+                    <div><label>راندمان حرارتی CHP</label><input type="number" id="chp-heat-eff" value="0.50" step="0.01"></div>
+                </div>
+                <button class="btn-success" onclick="App.calcCHP()">🧮 محاسبه CHP</button>
+                <div id="chp-results" style="margin-top:20px;"></div>
+            </section>
+
+            <section id="tab-ref" class="tab-pane">
+                <h2>❄️ تحلیل تبرید</h2>
+                <div class="form-grid">
+                    <div><label>بار سرمایشی (kW)</label><input type="number" id="ref-load" value="100"></div>
+                    <div><label>دمای فرآیند (°C)</label><input type="number" id="ref-tproc" value="-20"></div>
+                    <div><label>دمای محیط (°C)</label><input type="number" id="ref-tamb" value="25"></div>
+                    <div><label>ΔT اواپراتور (K)</label><input type="number" id="ref-dtevap" value="5"></div>
+                    <div><label>ΔT کندانسور (K)</label><input type="number" id="ref-dtcond" value="10"></div>
+                    <div><label>راندمان آیزنتروپیک</label><input type="number" id="ref-eta" value="0.70" step="0.01"></div>
+                </div>
+                <button class="btn-success" onclick="App.calcRef()">🧮 محاسبه تبرید</button>
+                <div id="ref-results" style="margin-top:20px;"></div>
+
+                <hr style="margin:40px 0; border:none; border-top:2px solid #e2e8f0;">
+
+                <h2>💧 تحلیل پینچ آب</h2>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead><tr><th>نام</th><th>دبی (t/h)</th><th>Cin</th><th>Cout</th></tr></thead>
+                        <tbody>
+                            <tr><td><input id="w1-name" value="W1"></td><td><input id="w1-flow" type="number" value="10"></td><td><input id="w1-cin" type="number" value="0.01" step="0.001"></td><td><input id="w1-cout" type="number" value="0.05" step="0.001"></td></tr>
+                            <tr><td><input id="w2-name" value="W2"></td><td><input id="w2-flow" type="number" value="20"></td><td><input id="w2-cin" type="number" value="0.05" step="0.001"></td><td><input id="w2-cout" type="number" value="0.10" step="0.001"></td></tr>
+                            <tr><td><input id="w3-name" value="W3"></td><td><input id="w3-flow" type="number" value="5"></td><td><input id="w3-cin" type="number" value="0.02" step="0.001"></td><td><input id="w3-cout" type="number" value="0.08" step="0.001"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn-success" onclick="App.calcWater()">💧 تحلیل پینچ آب</button>
+                <div id="water-results" style="margin-top:20px;"></div>
+            </section>
+
+            <section id="tab-report" class="tab-pane">
+                <h2>📄 گزارش جامع</h2>
+                <p class="hint">
+                    ابتدا روی «تولید گزارش» کلیک کنید تا کامل ساخته شود، سپس «ذخیره PDF».
+                </p>
+                <div class="actions" style="margin-bottom:20px;">
+                    <button class="btn-primary" onclick="App.generateReport()">📋 تولید گزارش</button>
+                    <button class="btn-success" onclick="App.printReport()">🖨️ ذخیره PDF</button>
+                </div>
+                <div id="report-status"></div>
+                <div id="report-content" style="margin-top:25px;"></div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<footer class="footer">
+    <p>🏭 <strong>Pinch Master Pro v7.0</strong></p>
+    <p class="author-line">Developed by <strong>Hossein Sahraei</strong></p>
+    <p style="font-size:0.8rem; margin-top:8px; opacity:0.7;">
+        Based on Kemp · Smith · Linnhoff · Omidkhah
+    </p>
+</footer>
+
+<script src="app.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('[PWA] Service Worker registered'))
+                .catch(err => console.log('[PWA] SW failed:', err));
+        });
+    }
+</script>
+
+</body>
+</html>
